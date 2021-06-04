@@ -32,7 +32,8 @@ def updateDicts(ruas, tipoLixo, totalLitros, localizacao):
     updateResiduos(separacoes, tipoLixo, totalLitros)
 
 
-# Povoar o dicionário das ruas : chave -> id e valor -> (inicio, fim, (lat,long))
+# Povoar o dicionário que representa o percurso de uma rua
+#  : chave -> id do percurso e valor -> (inicio, fim, (lat,long))
 def updateRuas(listaSeps, localizacao):
     idRuas = int(listaSeps[0])
     if(ruasDict.has_key(idRuas)):
@@ -51,7 +52,7 @@ def updateRuas(listaSeps, localizacao):
         ruasDict.update({idRuas : (rua,'',localizacao)})
 
 
-# Povoar o dicionário dos resíduos: Chave -> idRua e Valor -> [(Residuo, TotalLitros)]
+# Povoar o dicionário dos resíduos: Chave -> idPercursoRua e Valor -> [(Residuo, TotalLitros)]
 def updateResiduos(seps, lixo, litros):
     par = (lixo,litros)
     idRuas = int(seps[0])
@@ -61,7 +62,7 @@ def updateResiduos(seps, lixo, litros):
         residuosDict[idRuas] = [par]
 
 
-# Calcular a distância entre dois pontos 
+# Calcular a distância entre dois pontos (cada ponto representa o percurso de recolha de uma rua)
 def calcularDistancia(fim,inicio):
     (lat1,long1) = fim
     (lat2,long2) = inicio
@@ -69,26 +70,32 @@ def calcularDistancia(fim,inicio):
     return result
 
 
-# Formar o arco a partir do ponto de início de uma rua
+# Formar o arco entre dois percursos de recolha relativos a uma rua
 def formarArco(idInicio,rua):
-    (_,destino,locInicio) = rua
-    if(destino != ''):
-        # print('Destino: ' + destino)
-        (idDest,(latDest,longDest)) = procurarDestino(destino)
-        if(latDest != -1 and longDest != -1):
+    (inicio,destino,locInicio) = rua
+    listaDests = procurarDestino(idInicio,inicio,destino)
+    if len(listaDests) == 0:
+            triplo = (idInicio,-1,(-1,-1))
+            arcosDict[idInicio] = [triplo]
+    else:
+        for (idDest,(latDest,longDest)) in listaDests:
             dist = calcularDistancia((latDest,longDest),locInicio)
-        else:
-            dist = -1
-        arcosDict[idInicio] = (idInicio, idDest, dist)
+            
+            if dist > 0:
+                if idInicio in arcosDict:    
+                    arcosDict[idInicio].append((idInicio, idDest, dist))
+                else:
+                    arcosDict[idInicio] = [(idInicio,idDest,dist)]
 
 
-# Procurar o final de uma rua
-def procurarDestino(destino):
+# Procurar os percursos seguintes a que podemos recorrer, a partir de uma rua
+def procurarDestino(idInicio,inicio,destino):
+    res = []
     for key, value in ruasDict.items():
-        (inicio,_,locInicio) = value
-        if(inicio == destino):
-            return (key, locInicio)
-    return (-1,(-1.0,-1.0))
+        (ini,_,locInicio) = value
+        if((inicio == ini and key > idInicio) or (destino == ini)):
+            res.append((key,locInicio))
+    return res
 
 
 # Dicionario que guarda os nodos do grafo e a lista dos seus adjacentes
@@ -139,8 +146,9 @@ dist = calcularDistancia((lat,long),(-9.10206034846112, 35.7082819634324))
 arcosSet.add('arco({},{},{}).\n'.format(0,15805,dist))
 
 for key, value in arcosDict.items():
-    (idIn,idDest,dist) = value
-    arcosSet.add('arco({},{},{}).\n'.format(idIn,idDest,dist))
+    for elem in value:
+        (idInicio,idFim,dist) = elem
+        arcosSet.add('arco({},{},{}).\n'.format(idInicio,idFim,dist))
 
 (_,_,(lat,long)) = ruasDict[15876]
 dist = calcularDistancia((-9.12404532851606, 36.4528294413797),(lat,long))
