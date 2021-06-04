@@ -3,6 +3,7 @@
 
 import pandas as pd
 import numpy as np
+import re 
 
 # Ler o conteudo do dataset
 df = pd.read_excel(r'../Dados/dataset.xlsx',encoding='utf-8')
@@ -44,12 +45,12 @@ def updateRuas(listaSeps, localizacao):
         inicio = '\'' + inicio + '\''
         fim = ruas.split(' - ')[1]
         fim = fim.split(')')[0]
+        if fim == 'R Cintura (Santos':
+            fim = 'R Cintura (Santos)'
         fim = '\'' + fim + '\''
         ruasDict.update({idRuas : (inicio, fim, localizacao)})
     else:
-        rua = listaSeps[1]
-        rua = '\'' + rua + '\''
-        ruasDict.update({idRuas : (rua,'',localizacao)})
+        pass
 
 
 # Povoar o dicionário dos resíduos: Chave -> idPercursoRua e Valor -> [(Residuo, TotalLitros)]
@@ -72,11 +73,10 @@ def calcularDistancia(fim,inicio):
 
 # Formar o arco entre dois percursos de recolha relativos a uma rua
 def formarArco(idInicio,rua):
-    (inicio,destino,locInicio) = rua
-    listaDests = procurarDestino(idInicio,inicio,destino)
+    (_,destino,locInicio) = rua
+    listaDests = procurarDestino(destino)
     if len(listaDests) == 0:
-            triplo = (idInicio,-1,(-1,-1))
-            arcosDict[idInicio] = [triplo]
+            pass
     else:
         for (idDest,(latDest,longDest)) in listaDests:
             dist = calcularDistancia((latDest,longDest),locInicio)
@@ -89,11 +89,11 @@ def formarArco(idInicio,rua):
 
 
 # Procurar os percursos seguintes a que podemos recorrer, a partir de uma rua
-def procurarDestino(idInicio,inicio,destino):
+def procurarDestino(destino):
     res = []
     for key, value in ruasDict.items():
         (ini,_,locInicio) = value
-        if((inicio == ini and key > idInicio) or (destino == ini)):
+        if destino == ini:
             res.append((key,locInicio))
     return res
 
@@ -150,9 +150,9 @@ for key, value in arcosDict.items():
         (idInicio,idFim,dist) = elem
         arcosSet.add('arco({},{},{}).\n'.format(idInicio,idFim,dist))
 
-(_,_,(lat,long)) = ruasDict[15876]
+(_,_,(lat,long)) = ruasDict[15899]
 dist = calcularDistancia((-9.12404532851606, 36.4528294413797),(lat,long))
-arcosSet.add('arco({},{},{}).\n'.format(15876,9999,dist))
+arcosSet.add('arco({},{},{}).\n'.format(15899,9999,dist))
 
 distDepositoGaragem = calcularDistancia((-9.10206034846112, 35.7082819634324),(-9.12404532851606, 36.4528294413797))
 arcosSet.add('arco({},{},{}).\n'.format(9999,0,distDepositoGaragem))
