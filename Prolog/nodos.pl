@@ -1,11 +1,13 @@
 %%nodo(Id, Nome, (Latitude, Longitude), [(Residuo, TotalLitros)]).
 nodo(15897,'Pc Sao Paulo',(-9.14534815013291, 38.7075837039225),[('Lixos', 280), ('Lixos', 240), ('Lixos', 280), ('Lixos', 240), ('Papel e Cartao', 140)]).
+nodo(9999,'Depósito',(-9.12404532851606, 36.4528294413797),[]).
 nodo(19295,'R Teixeira, 1',(-9.14460348898318, 38.7142829757734),[('Vidro', 140)]).
 nodo(15863,'Cc da Bica Grande',(-9.14664843006564, 38.7084822125522),[('Lixos', 240), ('Lixos', 140), ('Lixos', 240), ('Lixos', 140)]).
 nodo(19278,'R Correia Garcao, 3',(-9.15305561262562, 38.7119754868767),[('Vidro', 240), ('Organicos', 240)]).
 nodo(15869,'Tv dos Remolares',(-9.14447892499263, 38.7070868003123),[('Lixos', 560), ('Lixos', 240), ('Lixos', 560), ('Lixos', 240)]).
 nodo(15820,'Tv Marques de Sampaio',(-9.1485717796828, 38.7087267228466),[('Lixos', 840), ('Lixos', 480), ('Lixos', 90)]).
 nodo(15809,'R Corpo Santo',(-9.14276596081499, 38.7070836135523),[('Lixos', 280), ('Lixos', 120)]).
+nodo(0,'Garagem',(-9.10206034846112, 35.7082819634324),[]).
 nodo(21866,'R O Seculo, 12',(-9.14731529890835, 38.7117372535528),[('Papel e Cartao', 90), ('Organicos', 90), ('Vidro', 90), ('Embalagens', 90), ('Lixos', 90), ('Lixos', 90)]).
 nodo(21911,'Tv Carvalho, frt no 29',(-9.14605416845402, 38.707919877341),[('Papel e Cartao', 6000), ('Embalagens', 6000), ('Vidro', 3000), ('Lixos', 6000)]).
 nodo(15824,'R Instituto Industrial',(-9.15079311664937, 38.7089055507175),[('Lixos', 280), ('Lixos', 120), ('Lixos', 90)]).

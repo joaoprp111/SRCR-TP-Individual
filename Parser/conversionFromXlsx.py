@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 # Ler o conteudo do dataset
-df = pd.read_excel(r'dataset.xlsx',encoding='utf-8')
+df = pd.read_excel(r'../Dados/dataset.xlsx',encoding='utf-8')
 
 # Guardar as linhas necessárias para transformar em ascii
 i = 0
@@ -113,26 +113,41 @@ for key, value in ruasDict.items():
 
 
 # Converter tudo em predicados para utilizar no Prolog
-nodosGrafo = open('nodos.pl','w+')
+nodosGrafo = open('../Prolog/nodos.pl','w+')
 nodosGrafo.write('%%nodo(Id, Nome, (Latitude, Longitude), [(Residuo, TotalLitros)]).\n')
 nodos = set()
+# Definição de um nodo representante da garagem, que se situa perto da R Ferragial
+nodos.add('nodo(0,\'Garagem\',(-9.10206034846112, 35.7082819634324),[]).\n') 
 
 for key, value in ruasDict.items():
     (inicio,_,(latitude,longitude)) = value 
     listaResiduos = residuosDict[key]
     nodos.add('nodo({},{},{},{}).\n'.format(key,inicio,(latitude,longitude),listaResiduos))
 
+# Definição de um nodo representante do local de depósito, que se situa perto da Av 24 de Julho
+nodos.add('nodo(9999,\'Depósito\',(-9.12404532851606, 36.4528294413797),[]).\n') 
+
 for nodo in nodos:
     nodosGrafo.write(nodo)
 nodosGrafo.close()
 
-arcos = open('arcos.pl','w+')
+arcos = open('../Prolog/arcos.pl','w+')
 arcos.write('%%arco(idInicio,idFim,distancia).\n')
 arcosSet = set()
+(_,_,(lat,long)) = ruasDict[15805]
+dist = calcularDistancia((lat,long),(-9.10206034846112, 35.7082819634324))
+arcosSet.add('arco({},{},{}).\n'.format(0,15805,dist))
 
 for key, value in arcosDict.items():
     (idIn,idDest,dist) = value
     arcosSet.add('arco({},{},{}).\n'.format(idIn,idDest,dist))
+
+(_,_,(lat,long)) = ruasDict[15876]
+dist = calcularDistancia((-9.12404532851606, 36.4528294413797),(lat,long))
+arcosSet.add('arco({},{},{}).\n'.format(15876,9999,dist))
+
+distDepositoGaragem = calcularDistancia((-9.10206034846112, 35.7082819634324),(-9.12404532851606, 36.4528294413797))
+arcosSet.add('arco({},{},{}).\n'.format(9999,0,distDepositoGaragem))
 
 for arco in arcosSet:
     arcos.write(arco)
