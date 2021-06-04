@@ -1,4 +1,7 @@
 %%arco(idInicio,idFim,distancia).
+%% Cada arco indica que há a possibilidade de passar do percurso de recolha idInicio para o percurso
+%% idFim, com o objetivo de fazer uma nova recolha de residuos,
+%% e esta mudança exige percorrer a distancia indicada.
 arco(21939,-1,(-1, -1)).
 arco(15890,15852,0.00142727854487).
 arco(15880,15819,0.00145958460116).

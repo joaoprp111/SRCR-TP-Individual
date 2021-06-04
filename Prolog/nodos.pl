@@ -1,4 +1,7 @@
 %%nodo(Id, Nome, (Latitude, Longitude), [(Residuo, TotalLitros)]).
+%% Cada nodo representa um percurso de uma rua, estes possuem um id exclusivo, e um conjunto de resíduos
+%% Desta forma, podemos estar num nodo, recolher os resíduos e avançar para os próximos através dos arcos,
+%% que se encontram definidos no ficheiro arcos.pl
 nodo(15897,'Pc Sao Paulo',(-9.14534815013291, 38.7075837039225),[('Lixos', 280), ('Lixos', 240), ('Lixos', 280), ('Lixos', 240), ('Papel e Cartao', 140)]).
 nodo(9999,'Depósito',(-9.12404532851606, 36.4528294413797),[]).
 nodo(19295,'R Teixeira, 1',(-9.14460348898318, 38.7142829757734),[('Vidro', 140)]).
