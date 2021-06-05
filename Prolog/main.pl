@@ -7,6 +7,7 @@
 % Includes necessários, dos nodos e dos arcos
 :- include('nodos.pl').
 :- include('arcos.pl').
+:- include('auxiliares.pl').
 
 % ------------------------------------------ Dados do problema --------------------------------------------
 % Estado inicial (Garagem)
@@ -26,111 +27,85 @@ final(9999).
 % -> Primeiro em profundidade
 
 % Gerar todos os circuitos que partem da garagem, atingem o depósito e regressam à garagem
+% Para garagem e depósito fixos
+
+% 1.1) Indiferenciada
 
 printDfs(I) :-
     inicial(I),
-    dfs(I,[I],S,0,TotalRecolhido),
+    dfs(I,[I],S,0,TotalRecolhido,0,DistanciaTotal),
     escreverTriplo(S,0),
     write('Total recolhido no circuito: '),
-    write(TotalRecolhido).
+    write(TotalRecolhido), write(' | Distancia percorrida: '),
+    write(DistanciaTotal), write(' metros').
 
-dfs(Estado,_,[Estado/'Deposito'/0,EstadoInicial/'Garagem'/0],_,0) :-
+dfs(Estado,_,[Estado/'Deposito'/0,EstadoInicial/'Garagem'/0],_,0,_,0) :-
     final(Estado),
     arco(Estado,EstadoInicial,_).
 
-dfs(Estado,Historico,[Estado/Rua/TotalRecolhido|Sol],RecolhidoAtual,TotalRecolhidoFinal) :-
+dfs(Estado,Historico,[Estado/Rua/TotalRecolhido|Sol],RecolhidoAtual,TotalRecolhidoFinal,Dist,DistFinal) :-
     nodo(Estado,Rua,_,Recolhidos),
     recolher(Recolhidos,TotalRecolhido),
     RecolhidoAtual1 is RecolhidoAtual + TotalRecolhido,
-    arco(Estado,Estado1,_),
+    arco(Estado,Estado1,Distancia),
+    Dist1 is Dist + Distancia,
     nao(membro(Estado1,Historico)),
-    dfs(Estado1,[Estado1|Historico],Sol,RecolhidoAtual1,TotalRecolhido1),
-    TotalRecolhidoFinal is TotalRecolhido1 + TotalRecolhido.
+    dfs(Estado1,[Estado1|Historico],Sol,RecolhidoAtual1,TotalRecolhido1,Dist1,DistFinal1),
+    TotalRecolhidoFinal is TotalRecolhido1 + TotalRecolhido,
+    DistFinal is DistFinal1 + Distancia.
+
+% 1.2) Escolher o tipo de resíduo
+
+printDfsSeletiva(I,Tipo) :-
+    inicial(I),
+    dfsSeletiva(I,[I],S,0,TotalRecolhido,0,DistanciaTotal,Tipo),
+    escreverTriplo(S,0),
+    write('Total recolhido no circuito: '),
+    write(TotalRecolhido), write(' | Distancia percorrida: '),
+    write(DistanciaTotal), write(' metros').
+
+dfsSeletiva(Estado,_,[Estado/'Deposito'/0,EstadoInicial/'Garagem'/0],_,0,_,0,_) :-
+    final(Estado),
+    arco(Estado,EstadoInicial,_).
+
+dfsSeletiva(Estado,Historico,[Estado/Rua/TotalRecolhido|Sol],RecolhidoAtual,
+TotalRecolhidoFinal,Dist,DistFinal,Tipo) :-
+    nodo(Estado,Rua,_,Recolhidos),
+    selecionaTipo(Recolhidos,Tipo,Recolhidos1),
+    recolher(Recolhidos1,TotalRecolhido),
+    RecolhidoAtual1 is RecolhidoAtual + TotalRecolhido,
+    arco(Estado,Estado1,Distancia),
+    Dist1 is Dist + Distancia,
+    nao(membro(Estado1,Historico)),
+    dfsSeletiva(Estado1,[Estado1|Historico],Sol,RecolhidoAtual1,TotalRecolhido1,
+    Dist1,DistFinal1,Tipo),
+    TotalRecolhidoFinal is TotalRecolhido1 + TotalRecolhido,
+    DistFinal is DistFinal1 + Distancia.
 
 
-% Predicado para recolher os resíduos no percurso de uma rua 
-% recolher(ListaFonte,TotalRecolhido (litros))
-recolher(Lista,Total) :-
-    recolher(Lista,0,Total).
+% -> Primeiro em largura
+% resolvebf(Solucao) :-
+% 	inicial(InicialEstado),
+% 	resolvebf([(InicialEstado,[])|Xs]-Xs,[],Solucao).
 
-recolher([],_,0).
+% resolvebf([(Estado,Vs)|_]-_,_,Rs) :-
+% 	final(Estado),!,inverso(Vs,Rs).
 
-recolher([(_,TotalLitros)|T],Atual,Final) :-
-    Soma is Atual + TotalLitros,
-    recolher(T,Soma,Final1),
-    Final is Final1 + TotalLitros.
+% resolvebf([(Estado, _)|Xs]-Ys, Historico, Solucao):-
+% 	membro(Estado, Historico),!,
+% 	resolvebf(Xs-Ys,Historico,Solucao).
 
+% resolvebf([(Estado,Vs)|Xs]-Ys,Historico,Solucao) :-
+% 	setof((Move,Estado1), transicao(Estado,Move,Estado1),Ls),
+% 	atualizar(Ls,Vs,[Estado|Historico], Ys-Zs),
+% 	resolvebf(Xs-Zs,[Estado|Historico],Solucao).
 
-% printBfsIndiferenciada(I) :-
-%     bfsIndiferenciada(I,S,0,TotalRecolhido),
-%     escrever(S),
-%     write('Total Recolhido: '),
-%     escrever([TotalRecolhido]).
+% atualizar([],_,_,X-X).
 
-% bfsIndiferenciada(I,S,CapacidadeAtual,TotalRecolhido) :-
-%     inicial(I),
-%     bfsIndiferenciada(I,[I],S,CapacidadeAtual,TotalRecolhido).
+% atualizar([(_,Estado)|Ls], Vs, Historico, Xs-Ys) :-
+% 	membro(Estado,Historico), !,
+% 	atualizar(Ls,Vs,Historico,Xs-Ys).
 
-% bfsIndiferenciada(Estado,_,[Estado/[],EstadoInicial/[]],_,0) :-
-%     final(Estado),
-%     arco(Estado,EstadoInicial,_).
-
-% bfsIndiferenciada(Estado,Historico,[Estado/ListaRecolhidos|Sol],CapacidadeAtual,TotalRecolhido) :-
-%     nodo(Estado,_,_,ListaResiduos),
-%     recolher(ListaResiduos,ListaRecolhidos,CapacidadeAtual,Recolhido),
-%     ProximaCapacidade is CapacidadeAtual + Recolhido,
-%     arco(Estado,Estado1,_),
-%     nao(membro(Estado1,Historico)),
-%     bfsIndiferenciada(Estado1,[Estado1|Historico],Sol,ProximaCapacidade,TotalRecolhido1),
-%     TotalRecolhido is TotalRecolhido1 + Recolhido.
-
-
-% ------------------------------------------ Predicados auxiliares --------------------------------------
-nao( Questao ) :-
-    Questao, !, fail.
-nao( _ ).
-
-membro(X,[X|_]).
-membro(X,[_|T]) :-
-	membro(X,T).
-
-inverso(Xs,Ys) :-
-    inverso(Xs,[],Ys).
-
-inverso([],Xs,Xs).
-inverso([X|Xs],Ys,Zs) :-
-    inverso(Xs,[X|Ys],Zs).
-
-escrever([]) :-
-	write('').
-escrever([X|T]) :-
-	write(X),
-	write('\n'),
-	escrever(T).
-
-escreverSeguido([]) :-
-	write('').
-escreverSeguido([(X,Y)|T]) :-
-	write('('), write(X), write(','), write(Y), write(')'),
-	write(' | '),
-	escreverSeguido(T).
-
-escreverTriplo([],_) :-
-	write('').
-escreverTriplo([Id/Rua/TotalRecolhido|T],N) :-
-    N1 is N + 1,
-    write(N1), write(') '),
-	write('Id: '), write(Id), write(' | Rua: '), write(Rua), write(' | Total recolhido: '),
-    write(TotalRecolhido), write(' litros'),
-	write('\n'),
-	escreverTriplo(T,N1).
-
-escreverQuadra([]) :-
-	write('').
-escreverQuadra([Id/Rua/TotalRecolhido/Rs|T]) :-
-	write('Id: '), write(Id), write(' | Rua: '), write(Rua), write(' | Total recolhido: '),
-    write(TotalRecolhido), write(' litros'),
-    write(' | Residuos: '), escreverSeguido(Rs),
-	write('\n'),
-	escreverQuadra(T).
+% atualizar([(Move,Estado)|Ls], Vs, Historico, [(Estado, [Move|Vs])|Xs]-Ys) :-
+% 	atualizar(Ls,Vs,Historico,Xs-Ys).
 
