@@ -68,7 +68,7 @@ def calcularDistancia(fim,inicio):
     (lat1,long1) = fim
     (lat2,long2) = inicio
     result = np.sqrt(  (lat1-lat2)**2 + (long1-long2)**2 )
-    return result
+    return result * 1000
 
 
 # Formar o arco entre dois percursos de recolha relativos a uma rua
@@ -171,9 +171,9 @@ arcos.close()
 # for elem in residSorted:
 #     print(elem)
 
-# arcosSorted = sorted(arcosDict.items()) # Ordenar o dicionário pelo ID das ruas
-# for elem in arcosSorted:
-#     print(elem)
+arcosSorted = sorted(arcosDict.items()) # Ordenar o dicionário pelo ID das ruas
+for elem in arcosSorted:
+    print(elem)
 
 
 

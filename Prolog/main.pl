@@ -19,65 +19,65 @@ final(9999).
 capacidadeMax(15000).
 
 % ------------------------------------------ Pesquisa nao informada --------------------------------------
-% 1) Primeiro em profundidade (BFS)
+% 1) Primeiro em profundidade (DFS)
 % 1.1) Gerar os circuitos de recolha tanto indiferenciada como seletiva, caso existam, que
 % cubram um determinado território
 % 1.1.1) Indiferenciada
 
-printBfs(I) :-
-    bfs(I,[I],S),
+printDfs(I) :-
+    dfs(I,[I],S),
     escrever([I|S]).
 
-bfs(Estado,_,[EstadoInicial]) :-
+dfs(Estado,_,[EstadoInicial]) :-
     final(Estado),
     arco(Estado,EstadoInicial,_).
 
-bfs(Estado,Historico,[Estado1|Sol]) :-
+dfs(Estado,Historico,[Estado1|Sol]) :-
     arco(Estado,Estado1,_),
     nao(membro(Estado1,Historico)),
-    bfs(Estado1,[Estado1|Historico],Sol).
+    dfs(Estado1,[Estado1|Historico],Sol).
 
 
 
-printBfsIndiferenciada(I) :-
-    bfsIndiferenciada(I,S,0,TotalRecolhido),
-    escrever(S),
-    write('Total Recolhido: '),
-    escrever([TotalRecolhido]).
+% printBfsIndiferenciada(I) :-
+%     bfsIndiferenciada(I,S,0,TotalRecolhido),
+%     escrever(S),
+%     write('Total Recolhido: '),
+%     escrever([TotalRecolhido]).
 
-bfsIndiferenciada(I,S,CapacidadeAtual,TotalRecolhido) :-
-    inicial(I),
-    bfsIndiferenciada(I,[I],S,CapacidadeAtual,TotalRecolhido).
+% bfsIndiferenciada(I,S,CapacidadeAtual,TotalRecolhido) :-
+%     inicial(I),
+%     bfsIndiferenciada(I,[I],S,CapacidadeAtual,TotalRecolhido).
 
-bfsIndiferenciada(Estado,_,[Estado/[],EstadoInicial/[]],_,0) :-
-    final(Estado),
-    arco(Estado,EstadoInicial,_).
+% bfsIndiferenciada(Estado,_,[Estado/[],EstadoInicial/[]],_,0) :-
+%     final(Estado),
+%     arco(Estado,EstadoInicial,_).
 
-bfsIndiferenciada(Estado,Historico,[Estado/ListaRecolhidos|Sol],CapacidadeAtual,TotalRecolhido) :-
-    nodo(Estado,_,_,ListaResiduos),
-    recolher(ListaResiduos,ListaRecolhidos,CapacidadeAtual,Recolhido),
-    ProximaCapacidade is CapacidadeAtual + Recolhido,
-    arco(Estado,Estado1,_),
-    nao(membro(Estado1,Historico)),
-    bfsIndiferenciada(Estado1,[Estado1|Historico],Sol,ProximaCapacidade,TotalRecolhido1),
-    TotalRecolhido is TotalRecolhido1 + Recolhido.
+% bfsIndiferenciada(Estado,Historico,[Estado/ListaRecolhidos|Sol],CapacidadeAtual,TotalRecolhido) :-
+%     nodo(Estado,_,_,ListaResiduos),
+%     recolher(ListaResiduos,ListaRecolhidos,CapacidadeAtual,Recolhido),
+%     ProximaCapacidade is CapacidadeAtual + Recolhido,
+%     arco(Estado,Estado1,_),
+%     nao(membro(Estado1,Historico)),
+%     bfsIndiferenciada(Estado1,[Estado1|Historico],Sol,ProximaCapacidade,TotalRecolhido1),
+%     TotalRecolhido is TotalRecolhido1 + Recolhido.
 
 
 
-recolher([],[],_,0).
+% recolher([],[],_,0).
 
-recolher([(_,TotalLitros)|T],S,LitrosAtual,LitrosFinal) :-
-    Soma is LitrosAtual + TotalLitros,
-    capacidadeMax(Max),
-    Max < Soma,
-    recolher(T,S,LitrosAtual,LitrosFinal).
+% recolher([(_,TotalLitros)|T],S,LitrosAtual,LitrosFinal) :-
+%     Soma is LitrosAtual + TotalLitros,
+%     capacidadeMax(Max),
+%     Max < Soma,
+%     recolher(T,S,LitrosAtual,LitrosFinal).
 
-recolher([(Lixo,TotalLitros)|T],[(Lixo,TotalLitros)|S],LitrosAtual,LitrosFinal) :-
-    Soma is LitrosAtual + TotalLitros,
-    capacidadeMax(Max),
-    Max >= Soma,
-    recolher(T,S,Soma,LitrosFinal1),
-    LitrosFinal is TotalLitros + LitrosFinal1.
+% recolher([(Lixo,TotalLitros)|T],[(Lixo,TotalLitros)|S],LitrosAtual,LitrosFinal) :-
+%     Soma is LitrosAtual + TotalLitros,
+%     capacidadeMax(Max),
+%     Max >= Soma,
+%     recolher(T,S,Soma,LitrosFinal1),
+%     LitrosFinal is TotalLitros + LitrosFinal1.
 
 
 
