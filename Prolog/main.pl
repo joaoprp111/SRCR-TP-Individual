@@ -16,27 +16,49 @@ inicial(0).
 final(9999).
 
 % Capacidade de carga do veículo coletor de resíduos (em dm3 -> 15 m3 == 15000 dm3)
-capacidadeMax(15000).
+% capacidadeMax(15000).
 
 % ------------------------------------------ Pesquisa nao informada --------------------------------------
-% 1) Primeiro em profundidade (DFS)
-% 1.1) Gerar os circuitos de recolha tanto indiferenciada como seletiva, caso existam, que
+
+% 1) Gerar os circuitos de recolha tanto indiferenciada como seletiva, caso existam, que
 % cubram um determinado território
-% 1.1.1) Indiferenciada
+
+% -> Primeiro em profundidade
+
+% Gerar todos os circuitos que partem da garagem, atingem o depósito e regressam à garagem
 
 printDfs(I) :-
-    dfs(I,[I],S),
-    escrever([I|S]).
+    inicial(I),
+    dfs(I,[I],S,0,TotalRecolhido),
+    escreverTriplo(S,0),
+    write('Total recolhido no circuito: '),
+    write(TotalRecolhido).
 
-dfs(Estado,_,[EstadoInicial]) :-
+dfs(Estado,_,[Estado/'Deposito'/0,EstadoInicial/'Garagem'/0],_,0) :-
     final(Estado),
     arco(Estado,EstadoInicial,_).
 
-dfs(Estado,Historico,[Estado1|Sol]) :-
+dfs(Estado,Historico,[Estado/Rua/TotalRecolhido|Sol],RecolhidoAtual,TotalRecolhidoFinal) :-
+    nodo(Estado,Rua,_,Recolhidos),
+    recolher(Recolhidos,TotalRecolhido),
+    RecolhidoAtual1 is RecolhidoAtual + TotalRecolhido,
     arco(Estado,Estado1,_),
     nao(membro(Estado1,Historico)),
-    dfs(Estado1,[Estado1|Historico],Sol).
+    dfs(Estado1,[Estado1|Historico],Sol,RecolhidoAtual1,TotalRecolhido1),
+    TotalRecolhidoFinal is TotalRecolhido1 + TotalRecolhido.
 
+
+% Predicado para recolher os resíduos no percurso de uma rua 
+% recolher(ListaFonte,TotalRecolhido (litros))
+recolher(Lista,Total) :-
+    recolher(Lista,0,Total).
+
+recolher([],_,0).
+
+recolher([(_,TotalLitros)|T],Atual,Final) :-
+    Soma is Atual + TotalLitros,
+    recolher(T,Soma,Final1),
+    Final is Final1 + TotalLitros.
 
 
 % printBfsIndiferenciada(I) :-
@@ -63,25 +85,6 @@ dfs(Estado,Historico,[Estado1|Sol]) :-
 %     TotalRecolhido is TotalRecolhido1 + Recolhido.
 
 
-
-% recolher([],[],_,0).
-
-% recolher([(_,TotalLitros)|T],S,LitrosAtual,LitrosFinal) :-
-%     Soma is LitrosAtual + TotalLitros,
-%     capacidadeMax(Max),
-%     Max < Soma,
-%     recolher(T,S,LitrosAtual,LitrosFinal).
-
-% recolher([(Lixo,TotalLitros)|T],[(Lixo,TotalLitros)|S],LitrosAtual,LitrosFinal) :-
-%     Soma is LitrosAtual + TotalLitros,
-%     capacidadeMax(Max),
-%     Max >= Soma,
-%     recolher(T,S,Soma,LitrosFinal1),
-%     LitrosFinal is TotalLitros + LitrosFinal1.
-
-
-
-
 % ------------------------------------------ Predicados auxiliares --------------------------------------
 nao( Questao ) :-
     Questao, !, fail.
@@ -104,4 +107,30 @@ escrever([X|T]) :-
 	write(X),
 	write('\n'),
 	escrever(T).
+
+escreverSeguido([]) :-
+	write('').
+escreverSeguido([(X,Y)|T]) :-
+	write('('), write(X), write(','), write(Y), write(')'),
+	write(' | '),
+	escreverSeguido(T).
+
+escreverTriplo([],_) :-
+	write('').
+escreverTriplo([Id/Rua/TotalRecolhido|T],N) :-
+    N1 is N + 1,
+    write(N1), write(') '),
+	write('Id: '), write(Id), write(' | Rua: '), write(Rua), write(' | Total recolhido: '),
+    write(TotalRecolhido), write(' litros'),
+	write('\n'),
+	escreverTriplo(T,N1).
+
+escreverQuadra([]) :-
+	write('').
+escreverQuadra([Id/Rua/TotalRecolhido/Rs|T]) :-
+	write('Id: '), write(Id), write(' | Rua: '), write(Rua), write(' | Total recolhido: '),
+    write(TotalRecolhido), write(' litros'),
+    write(' | Residuos: '), escreverSeguido(Rs),
+	write('\n'),
+	escreverQuadra(T).
 

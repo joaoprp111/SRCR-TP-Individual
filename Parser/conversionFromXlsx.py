@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-import numpy as np
+from math import sin, cos, atan2, sqrt, radians
 import re 
 
 # Ler o conteudo do dataset
@@ -64,11 +64,22 @@ def updateResiduos(seps, lixo, litros):
 
 
 # Calcular a distância entre dois pontos (cada ponto representa o percurso de recolha de uma rua)
-def calcularDistancia(fim,inicio):
+def calcularDistancia(fim,inicio): 	
     (lat1,long1) = fim
     (lat2,long2) = inicio
-    result = np.sqrt(  (lat1-lat2)**2 + (long1-long2)**2 )
-    return result * 1000
+
+    lat1 = radians(lat1)
+    lat2 = radians(lat2)
+    long1 = radians(long1)
+    long2 = radians(long2)
+
+    R = 6373.0
+    
+    dlon = long2 - long1
+    dlat = lat2 - lat1
+    a = (sin(dlat/2))**2 + cos(lat1) * cos(lat2) * (sin(dlon/2))**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    return R * c * 1000
 
 
 # Formar o arco entre dois percursos de recolha relativos a uma rua
