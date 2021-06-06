@@ -21,6 +21,15 @@ escrever([X|T]) :-
 	write('\n'),
 	escrever(T).
 
+escreverDupla([],_) :-
+	write('').
+escreverDupla([Id/Rua|T],N) :-
+    N1 is N + 1,
+    write(N1), write(') '),
+	write('Id: '), write(Id), write(' | Rua: '), write(Rua),
+	write('\n'),
+	escreverDupla(T,N1).
+
 escreverSeguido([]) :-
 	write('').
 escreverSeguido([(X,Y)|T]) :-
@@ -68,3 +77,6 @@ recolher([(_,TotalLitros)|T],Atual,Final) :-
     Soma is Atual + TotalLitros,
     recolher(T,Soma,Final1),
     Final is Final1 + TotalLitros.
+
+seleciona(E, [E|Xs], Xs).
+seleciona(E, [X|Xs], [X|Ys]) :- seleciona(E,Xs,Ys).

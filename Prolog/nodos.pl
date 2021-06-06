@@ -51,7 +51,6 @@ nodo(15888,'Cais do Sodre',(-9.14329884772974, 38.7065565483955),[('Lixos', 480)
 nodo(15885,'R Sao Paulo',(-9.14508822170713, 38.7079012322757),[('Lixos', 240), ('Lixos', 240)]).
 nodo(15847,'R Instituto Industrial',(-9.14993558128589, 38.7076158965573),[('Lixos', 4320), ('Lixos', 120)]).
 nodo(15805,'R Ferragial',(-9.14330880914792, 38.7080787857025),[('Lixos', 90), ('Lixos', 1680), ('Lixos', 90), ('Papel e Cartao', 1440), ('Papel e Cartao', 90)]).
-nodo(9999,'Depósito',(-9.12404532851606, 36.4528294413797),[]).
 nodo(15807,'R Ferragial',(-9.14348180670535, 38.7073026157039),[('Lixos', 240), ('Lixos', 420), ('Lixos', 240), ('Lixos', 420), ('Papel e Cartao', 240), ('Papel e Cartao', 140)]).
 nodo(15851,'R Ribeira Nova',(-9.14671590072996, 38.7075628281927),[('Lixos', 240), ('Lixos', 280), ('Papel e Cartao', 280)]).
 nodo(15860,'Pc Sao Paulo',(-9.14552858843579, 38.7081496329634),[('Lixos', 270), ('Lixos', 720), ('Lixos', 1540), ('Lixos', 240), ('Lixos', 270), ('Lixos', 720), ('Lixos', 1540), ('Lixos', 240), ('Papel e Cartao', 480)]).
@@ -62,7 +61,6 @@ nodo(15862,'Bc da Moeda',(-9.14634879700261, 38.7084307669213),[('Lixos', 90), (
 nodo(15852,'R Remolares',(-9.14493001491084, 38.7072810634258),[('Lixos', 140), ('Lixos', 120), ('Lixos', 90), ('Lixos', 240), ('Papel e Cartao', 240)]).
 nodo(15863,'Cc da Bica Grande',(-9.14664843006564, 38.7084822125522),[('Lixos', 240), ('Lixos', 140), ('Lixos', 240), ('Lixos', 140)]).
 nodo(15878,'Pc Duque da Terceira',(-9.14281417070135, 38.7064256244632),[('Lixos', 240), ('Lixos', 140), ('Lixos', 240), ('Lixos', 140)]).
-nodo(15824,'R Instituto Industrial',(-9.15079311664937, 38.7089055507175),[('Lixos', 280), ('Lixos', 120), ('Lixos', 90)]).
 nodo(15899,'Tv dos Remolares',(-9.14473414894124, 38.7064360246404),[('Lixos', 140)]).
 nodo(15811,'Lg Corpo Santo',(-9.14240835587344, 38.7069966274245),[('Lixos', 420), ('Lixos', 960), ('Lixos', 420), ('Lixos', 960), ('Papel e Cartao', 240)]).
 nodo(15871,'Av 24 de Julho',(-9.14441649477531, 38.7067360350326),[('Lixos', 240), ('Lixos', 240)]).
@@ -74,7 +72,7 @@ nodo(15877,'R Cintura (Santos)',(-9.14324233291858, 38.7058093867279),[('Lixos',
 nodo(15848,'Bqr dos Ferreiros',(-9.14829055489657, 38.7075401361692),[('Lixos', 3120), ('Lixos', 4400), ('Lixos', 120), ('Lixos', 90)]).
 nodo(15818,'R da Boavista',(-9.14910552718357, 38.709073383915),[('Lixos', 240)]).
 nodo(15898,'Pc Duque da Terceira',(-9.14437680001953, 38.7063670578938),[('Lixos', 90), ('Lixos', 240), ('Lixos', 140)]).
-nodo(0,'Garagem',(-9.10206034846112, 35.7082819634324),[]).
+nodo(15824,'R Instituto Industrial',(-9.15079311664937, 38.7089055507175),[('Lixos', 280), ('Lixos', 120), ('Lixos', 90)]).
 nodo(15808,'Lg Corpo Santo',(-9.14255098678099, 38.7073286838222),[('Lixos', 280), ('Lixos', 960), ('Lixos', 280), ('Lixos', 960)]).
 nodo(15882,'R da Boavista',(-9.15059949287472, 38.709033347926),[('Lixos', 140), ('Lixos', 90)]).
 nodo(15861,'Tv Carvalho',(-9.14606015123382, 38.7083431936003),[('Lixos', 700), ('Lixos', 180), ('Lixos', 120), ('Lixos', 700), ('Lixos', 180), ('Lixos', 120)]).
