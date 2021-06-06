@@ -11,7 +11,7 @@
 
 % ------------------------------------------ Dados do problema --------------------------------------------
 % Estado inicial (Garagem)
-inicial(15866).
+inicial(15805).
 
 % Estado final (Depósito)
 final(15899).
@@ -23,13 +23,14 @@ limite(6).
 numNodos(6). 
 
 % Tipo de resíduo a recolher
-tipo('Papel e Cartao').
+tipo('Lixos').
 
 % ---------------------------------------------------------------------------------------------------------
 
 % -> Primeiro em profundidade
 
-% Gerar todos os caminhos que partem dum nodo, atingem o depósito e regressam à garagem
+% 1) Gerar todos os circuitos de recolha num dado território
+% O território é limitado pelo número de pontos de recolha que queremos visitar.
 
 % 1.1) Indiferenciada
 % -> Tendo em conta que se deve percorrer X nodos obrigatoriamente.
@@ -69,8 +70,8 @@ dfsCircuitoRecolha(S) :-
     dfsCircuitoRecolha(I,[I],S,0,_,0,_,_,_).
 
 dfsCircuitoRecolha(Estado,Historico,[],_,0,_,0,SDeposito,DistDeposito) :-
-    nodo(Estado,Rua,_,Recolhidos),
-    recolher(Recolhidos,TotalRecolhido),
+    nodo(Estado,_,_,Recolhidos),
+    recolher(Recolhidos,_),
     numNodos(X),
     length(Historico,N),
     N == X,
@@ -90,7 +91,6 @@ Dist,DistFinal,SDeposito,DistDeposito) :-
     DistFinal is DistFinal1 + Distancia.
 
 todosIndiferenciada(Solucao,NumCaminhos) :-
-    inicial(I),
 	findall((S,C),(dfsCircuitoRecolha(S),length(S,C)),Solucao),
     length(Solucao,NumCaminhos).
 
@@ -98,7 +98,7 @@ todosIndiferenciada(Solucao,NumCaminhos) :-
 
 dfs(I,S) :-
     inicial(I),
-    dfs(I,[I],S,0,TotalRecolhido,0,DistanciaTotal).
+    dfs(I,[I],S,0,_,0,_).
 
 printDfs(I) :-
     inicial(I),
@@ -145,7 +145,7 @@ printDfsSeletiva(I) :-
     write(TotalRecolhido), write(' | Distancia percorrida: '),
     write(DistanciaTotal), write(' metros').
 
-dfsSeletiva(Estado,_,[Estado/Rua/0,EstadoInicial/Rua1/0],_,0,_,0,_) :-
+dfsSeletiva(Estado,_,[Estado/Rua/0,Estado1/Rua1/0],_,0,_,0,_) :-
     final(Estado),
     nodo(Estado,Rua,_,_),
     nodo(Estado1,Rua1,_,_),
@@ -262,79 +262,124 @@ todosSeletivaLim(Solucao,NumCaminhos) :-
     length(Solucao,NumCaminhos).
 
 
+% ---------------------------------------------------------------------------------------------------------
+% 2) Circuitos com mais pontos de recolha, por tipo de resíduo
+
 
 % -> Pesquisa Gulosa
+resolve_gulosaSemEscrever(Caminho,NumPontos) :-
+    inicial(I),
+    tipo(T),
+    nodo(I,_,_,Residuos),
+    quantosPontosTem(Residuos,T,0,Quantos),
+    agulosa([[I]/Quantos], InvCaminho/NumPontos),
+    inverso(InvCaminho,Caminho).
 
-% resolve_gulosa(I,Caminho/Custo) :-
-%     arco(I,_,Dist),
-%     agulosa([[I]/0/Dist], InvCaminho/Custo/_),
-%     inverso(InvCaminho,Caminho).
+resolve_gulosa(I) :-
+    tipo(T),
+    nodo(I,_,_,Residuos),
+    quantosPontosTem(Residuos,T,0,Quantos),
+    agulosa([[I]/Quantos], InvCaminho/NumPontos),
+    inverso(InvCaminho,Caminho),
+    escrever(Caminho),
+    write('Número de pontos de recolha: '), write(NumPontos), write('\n').
 
-% agulosa(Caminhos, Caminho) :-
-%     obtem_melhor_g(Caminhos, Caminho),
-%     Caminho = [Nodo|_]/_/_,
-%     final(Nodo).
+agulosa(Caminhos, Caminho) :-
+    obtem_melhor_g(Caminhos, Caminho),
+    Caminho = [Nodo|_]/_,
+    final(Nodo).
 
-% agulosa(Caminhos,SolucaoCaminho) :-
-%     obtem_melhor_g(Caminhos, MelhorCaminho),
-%     seleciona(MelhorCaminho, Caminhos, OutrosCaminhos),
-%     expande_gulosa(MelhorCaminho, ExpCaminhos),
-%     append(OutrosCaminhos, ExpCaminhos, NovoCaminhos),
-%     agulosa(NovoCaminhos, SolucaoCaminho).
+agulosa(Caminhos,SolucaoCaminho) :-
+    obtem_melhor_g(Caminhos, MelhorCaminho),
+    seleciona(MelhorCaminho, Caminhos, OutrosCaminhos),
+    expande_gulosa(MelhorCaminho, ExpCaminhos),
+    append(OutrosCaminhos, ExpCaminhos, NovoCaminhos),
+    agulosa(NovoCaminhos, SolucaoCaminho).
 
-% obtem_melhor_g([Caminho],Caminho) :- !.
+obtem_melhor_g([Caminho],Caminho) :- !.
 
-% obtem_melhor_g([Caminho1/Custo1/Est1,_/Custo2/Est2|Caminhos], MelhorCaminho) :-
-%     Est1 =< Est2, !,
-%     obtem_melhor_g([Caminho1/Custo1/Est1|Caminhos], MelhorCaminho).
+obtem_melhor_g([Caminho1/Quantos1,_/Quantos2|Caminhos], MelhorCaminho) :-
+    Quantos1 > Quantos2, !,
+    obtem_melhor_g([Caminho1/Quantos1|Caminhos], MelhorCaminho).
 
-% obtem_melhor_g([_|Caminhos], MelhorCaminho) :-
-%     obtem_melhor_g(Caminhos, MelhorCaminho).
+obtem_melhor_g([_|Caminhos], MelhorCaminho) :-
+    obtem_melhor_g(Caminhos, MelhorCaminho).
 
-% expande_gulosa(Caminho, ExpCaminhos) :-
-%     findall(NovoCaminho, adjacente3(Caminho, NovoCaminho), ExpCaminhos).
-
-
-% adjacente3([Nodo|Caminho]/Custo/_, [ProxNodo,Nodo|Caminho]/NovoCusto/Dist) :-
-%     arco(Nodo, ProxNodo, PassoCusto),\+ member(ProxNodo, Caminho),
-%     NovoCusto is Custo + PassoCusto,
-%     arco(Nodo,ProxNodo, Dist).
+expande_gulosa(Caminho, ExpCaminhos) :-
+    findall(NovoCaminho, adjacente3(Caminho, NovoCaminho), ExpCaminhos).
 
 
+adjacente3([Nodo|Caminho]/Quantos, [ProxNodo,Nodo|Caminho]/NovoQuantos) :-
+    arco(Nodo, ProxNodo, _),\+ member(ProxNodo, Caminho),
+    nodo(Nodo,_,_,Residuos),
+    tipo(T),
+    quantosPontosTem(Residuos,T,0,Quantos1),
+    NovoQuantos is Quantos + Quantos1,
+    arco(Nodo,ProxNodo, _).
 
 
+% Pesquisa em profundidade
+dfsMaisPontosRecolha(I,S/NumPontos) :-
+    inicial(I),
+    dfsMaisPontosRecolha(I,[I],S,0,NumPontos).
 
+% Os estados final e inicial nao contam para a contagem
+dfsMaisPontosRecolha(Estado,_,[Inicio/Rua1/0,Estado/Rua/0],_,0) :-
+    final(Estado),
+    nodo(Estado,Rua,_,_),
+    arco(Estado,Inicio,_),
+    nodo(Inicio,Rua1,_,_).
 
+dfsMaisPontosRecolha(Estado,Historico,[Estado/Rua/Quantos|Sol],Atual,Total) :-
+    nodo(Estado,Rua,_,Recolhidos),
+    tipo(T),
+    quantosPontosTem(Recolhidos,T,0,Quantos),
+    Atual1 is Atual + Quantos,
+    arco(Estado,Estado1,_),
+    nao(membro(Estado1,Historico)),
+    dfsMaisPontosRecolha(Estado1,[Estado1|Historico],Sol,Atual1,Total1),
+    Total is Total1 + Quantos.
 
+todosMaisPontosRecolha(Solucao,NumSolucoes) :-
+    inicial(I),
+	findall((S,NumPontos),(dfsMaisPontosRecolha(I,S/NumPontos)),Solucao),
+    length(Solucao,NumSolucoes).
 
+maisPontosRecolha :-
+    todosMaisPontosRecolha(Sol,_),
+    retirarElems(Sol,Sol1,50),
+    maximo(Sol1,(S,N)),
+    escreverTriplo2(S,0),
+    write('Total de pontos do tipo '),
+    tipo(T), write(T), write(' '), write(N).
 
 
 
 % -> Primeiro em largura
 
-bfsIndiferenciada(Solucao) :-
-    inicial(InicialEstado),
-	bfsIndiferenciada([(InicialEstado,[])|Xs]-Xs,[],Solucao).
+% bfsIndiferenciada(Solucao) :-
+%     inicial(InicialEstado),
+% 	bfsIndiferenciada([(InicialEstado,[])|Xs]-Xs,[],Solucao).
 
-bfsIndiferenciada([(Estado,Vs)|_]-_,_,Rs) :-
-	final(Estado),!,inverso(Vs,Rs).
+% bfsIndiferenciada([(Estado,Vs)|_]-_,_,Rs) :-
+% 	final(Estado),!,inverso(Vs,Rs).
 
-bfsIndiferenciada([(Estado, _)|Xs]-Ys, Historico, Solucao):-
-	membro(Estado, Historico),!,
-	bfsIndiferenciada(Xs-Ys,Historico,Solucao).
+% bfsIndiferenciada([(Estado, _)|Xs]-Ys, Historico, Solucao):-
+% 	membro(Estado, Historico),!,
+% 	bfsIndiferenciada(Xs-Ys,Historico,Solucao).
 
-bfsIndiferenciada([(Estado,Vs)|Xs]-Ys,Historico,Solucao) :-
-	setof((Dist,Estado1), arco(Estado,Estado1,Dist),Ls),
-	atualizar(Ls,Vs,[Estado|Historico], Ys-Zs),
-	bfsIndiferenciada(Xs-Zs,[Estado|Historico],Solucao).
+% bfsIndiferenciada([(Estado,Vs)|Xs]-Ys,Historico,Solucao) :-
+% 	setof((Dist,Estado1), arco(Estado,Estado1,Dist),Ls),
+% 	atualizar(Ls,Vs,[Estado|Historico], Ys-Zs),
+% 	bfsIndiferenciada(Xs-Zs,[Estado|Historico],Solucao).
 
-atualizar([],_,_,X-X).
+% atualizar([],_,_,X-X).
 
-atualizar([(_,Estado)|Ls], Vs, Historico, Xs-Ys) :-
-	membro(Estado,Historico), !,
-	atualizar(Ls,Vs,Historico,Xs-Ys).
+% atualizar([(_,Estado)|Ls], Vs, Historico, Xs-Ys) :-
+% 	membro(Estado,Historico), !,
+% 	atualizar(Ls,Vs,Historico,Xs-Ys).
 
-atualizar([(Dist,Estado)|Ls], Vs, Historico, [(Estado, [(Estado,Rua,Dist)|Vs])|Xs]-Ys) :-
-    nodo(Estado,Rua,_,_),
-	atualizar(Ls,Vs,Historico,Xs-Ys).
+% atualizar([(Dist,Estado)|Ls], Vs, Historico, [(Estado, [(Estado,Rua,Dist)|Vs])|Xs]-Ys) :-
+%     nodo(Estado,Rua,_,_),
+% 	atualizar(Ls,Vs,Historico,Xs-Ys).
 
