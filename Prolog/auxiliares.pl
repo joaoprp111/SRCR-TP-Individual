@@ -57,6 +57,26 @@ escreverTriplo2([Id/Rua/TotalRecolhido|T],N) :-
 	write('\n'),
 	escreverTriplo2(T,N1).
 
+escreverTriplo3([],_) :-
+	write('').
+escreverTriplo3([Id/Rua/TotalRecolhido|T],N) :-
+    N1 is N + 1,
+    write(N1), write(') '),
+	write('Id: '), write(Id), write(' | Rua: '), write(Rua), write(' | Distância da rua: '),
+    write(TotalRecolhido),
+	write('\n'),
+	escreverTriplo3(T,N1).
+
+escreverTriplo4([],_) :-
+	write('').
+escreverTriplo4([Id/Rua/TotalRecolhido|T],N) :-
+    N1 is N + 1,
+    write(N1), write(') '),
+	write('Id: '), write(Id), write(' | Rua: '), write(Rua), write(' | Razão de eficiência: '),
+    write(TotalRecolhido),
+	write('\n'),
+	escreverTriplo4(T,N1).
+
 escreverQuadra([]) :-
 	write('').
 escreverQuadra([Id/Rua/TotalRecolhido/Rs|T]) :-
@@ -106,6 +126,10 @@ maximo([(P,X)],(P,X)).
 maximo([(Px,X)|L],(Py,Y)) :- maximo(L,(Py,Y)), X =< Y.
 maximo([(Px,X)|L],(Px,X)) :- maximo(L,(Py,Y)), X > Y.
 
+
+minimo([(P,X)],(P,X)).
+minimo([(Px,X)|L],(Py,Y)) :- minimo(L,(Py,Y)), X > Y.
+minimo([(Px,X)|L],(Px,X)) :- minimo(L,(Py,Y)), X =< Y.
 
 retirarElems([],[],_).
 retirarElems(_,[],0).

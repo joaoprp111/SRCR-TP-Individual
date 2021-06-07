@@ -11,7 +11,7 @@
 
 % ------------------------------------------ Dados do problema --------------------------------------------
 % Estado inicial (Garagem)
-inicial(15805).
+inicial(15808).
 
 % Estado final (Depósito)
 final(15899).
@@ -125,10 +125,11 @@ dfs(Estado,Historico,[Estado/Rua/TotalRecolhido|Sol],RecolhidoAtual,TotalRecolhi
     TotalRecolhidoFinal is TotalRecolhido1 + TotalRecolhido,
     DistFinal is DistFinal1 + Distancia.
 
-qualquerCaminhoIndiferenciado(Solucao,NumCaminhos) :-
+qualquerCaminhoIndiferenciado(Solucao1,NumCaminhos) :-
     inicial(I),
 	findall((S,C),(dfs(I,S),length(S,C)),Solucao),
-    length(Solucao,NumCaminhos).
+    list_to_set(Solucao,Solucao1),
+    length(Solucao1,NumCaminhos).
 
 % 1.2) Escolher o tipo de resíduo
 
@@ -165,11 +166,12 @@ TotalRecolhidoFinal,Dist,DistFinal,Tipo) :-
     TotalRecolhidoFinal is TotalRecolhido1 + TotalRecolhido,
     DistFinal is DistFinal1 + Distancia.
 
-todosSeletiva(Solucao,NumCaminhos) :-
+todosSeletiva(Solucao1,NumCaminhos) :-
     inicial(I),
     tipo(Tipo),
 	findall((S,C),(dfsSeletiva(I,S,Tipo),length(S,C)),Solucao),
-    length(Solucao,NumCaminhos).
+    list_to_set(Solucao,Solucao1),
+    length(Solucao1,NumCaminhos).
 
 % -> Iterativa limitada
 % 1.1) Indiferenciada
@@ -210,10 +212,11 @@ Dist,DistFinal,Contador) :-
     TotalRecolhidoFinal is TotalRecolhido1 + TotalRecolhido,
     DistFinal is DistFinal1 + Distancia.
 
-todosIndiferenciadaLim(Solucao,NumCaminhos) :-
+todosIndiferenciadaLim(Sol1,NumCaminhos) :-
     inicial(I),
 	findall((S,C),(dfsLimitada(I,S),length(S,C)),Solucao),
-    length(Solucao,NumCaminhos).
+    list_to_set(Solucao,Sol1),
+    length(Sol1,NumCaminhos).
 
 % 1.2) Seletiva
 
@@ -256,10 +259,11 @@ TotalRecolhidoFinal,Dist,DistFinal,Tipo,Contador) :-
     TotalRecolhidoFinal is TotalRecolhido1 + TotalRecolhido,
     DistFinal is DistFinal1 + Distancia.
 
-todosSeletivaLim(Solucao,NumCaminhos) :-
+todosSeletivaLim(Sol1,NumCaminhos) :-
     inicial(I),
 	findall((S,C),(dfsSeletivaLim(I,S),length(S,C)),Solucao),
-    length(Solucao,NumCaminhos).
+    list_to_set(Solucao,Sol1),
+    length(Sol1,NumCaminhos).
 
 
 % ---------------------------------------------------------------------------------------------------------
@@ -354,32 +358,183 @@ maisPontosRecolha :-
     tipo(T), write(T), write(' '), write(N).
 
 
+% 3) Comparar circuitos tendo em conta os indicadores de produtividade
 
 % -> Primeiro em largura
+bfsIndiferenciada(Solucao) :-
+    inicial(InicialEstado),
+	bfsIndiferenciada([(InicialEstado,[])|Xs]-Xs,[],Solucao).
 
-% bfsIndiferenciada(Solucao) :-
-%     inicial(InicialEstado),
-% 	bfsIndiferenciada([(InicialEstado,[])|Xs]-Xs,[],Solucao).
+bfsIndiferenciada([(Estado,Vs)|_]-_,_,Rs) :-
+	final(Estado),!,inverso(Vs,Rs).
 
-% bfsIndiferenciada([(Estado,Vs)|_]-_,_,Rs) :-
-% 	final(Estado),!,inverso(Vs,Rs).
+bfsIndiferenciada([(Estado, _)|Xs]-Ys, Historico, Solucao):-
+	membro(Estado, Historico),!,
+	bfsIndiferenciada(Xs-Ys,Historico,Solucao).
 
-% bfsIndiferenciada([(Estado, _)|Xs]-Ys, Historico, Solucao):-
-% 	membro(Estado, Historico),!,
-% 	bfsIndiferenciada(Xs-Ys,Historico,Solucao).
+bfsIndiferenciada([(Estado,Vs)|Xs]-Ys,Historico,Solucao) :-
+	setof((Dist,Estado1), arco(Estado,Estado1,Dist),Ls),
+	atualizar(Ls,Vs,[Estado|Historico], Ys-Zs),
+	bfsIndiferenciada(Xs-Zs,[Estado|Historico],Solucao).
 
-% bfsIndiferenciada([(Estado,Vs)|Xs]-Ys,Historico,Solucao) :-
-% 	setof((Dist,Estado1), arco(Estado,Estado1,Dist),Ls),
-% 	atualizar(Ls,Vs,[Estado|Historico], Ys-Zs),
-% 	bfsIndiferenciada(Xs-Zs,[Estado|Historico],Solucao).
+atualizar([],_,_,X-X).
 
-% atualizar([],_,_,X-X).
+atualizar([(_,Estado)|Ls], Vs, Historico, Xs-Ys) :-
+	membro(Estado,Historico), !,
+	atualizar(Ls,Vs,Historico,Xs-Ys).
 
-% atualizar([(_,Estado)|Ls], Vs, Historico, Xs-Ys) :-
-% 	membro(Estado,Historico), !,
-% 	atualizar(Ls,Vs,Historico,Xs-Ys).
+atualizar([(Dist,Estado)|Ls], Vs, Historico, [(Estado, [(Estado,Rua,Dist)|Vs])|Xs]-Ys) :-
+    nodo(Estado,Rua,_,_),
+	atualizar(Ls,Vs,Historico,Xs-Ys).
 
-% atualizar([(Dist,Estado)|Ls], Vs, Historico, [(Estado, [(Estado,Rua,Dist)|Vs])|Xs]-Ys) :-
-%     nodo(Estado,Rua,_,_),
-% 	atualizar(Ls,Vs,Historico,Xs-Ys).
+% -> A* (heuristica, ir para o nodo adjacente que está menos distante)
+resolve_aestrela(I) :-
+    aestrela([[I]/0/0], InvCaminho/CustoTotal/QuantTotal),
+    inverso(InvCaminho,Caminho),
+    escrever(Caminho),
+    write('Distancia percorrida: '), write(CustoTotal),
+    write(' | Quantidade recolhida: '), write(QuantTotal),
+    write('\n').
+
+aestrela(Caminhos, Caminho) :-
+    obtem_melhor_e(Caminhos, Caminho),
+    Caminho = [Nodo|_]/_/_, final(Nodo).
+
+aestrela(Caminhos,SolucaoCaminho) :-
+    obtem_melhor_e(Caminhos, MelhorCaminho),
+    seleciona(MelhorCaminho, Caminhos, OutrosCaminhos),
+    expande_aestrela(MelhorCaminho, ExpCaminhos),
+    append(OutrosCaminhos, ExpCaminhos, NovoCaminhos),
+    aestrela(NovoCaminhos, SolucaoCaminho).
+
+obtem_melhor_e([Caminho],Caminho) :- !.
+
+obtem_melhor_e([Caminho1/Custo1/Quant1,_/Custo2/Quant2|Caminhos], MelhorCaminho) :-
+    Razao1 is Custo1 / Quant1,
+    Razao2 is Custo2 / Quant2,
+    Razao1 =< Razao2,!,
+    obtem_melhor_e([Caminho1/Custo1/Quant1|Caminhos], MelhorCaminho).
+
+obtem_melhor_e([_|Caminhos], MelhorCaminho) :-
+    obtem_melhor_e(Caminhos, MelhorCaminho).
+
+expande_aestrela(Caminho, ExpCaminhos) :-
+    findall(NovoCaminho, adjacente2(Caminho, NovoCaminho), ExpCaminhos).
+
+adjacente2([Nodo|Caminho]/Custo/Quant, [ProxNodo,Nodo|Caminho]/CustoTotal/QuantTotal) :-
+    arco(Nodo, ProxNodo, Custo1),
+    nodo(Nodo,_,_,Rs),
+    recolher(Rs,0,Total),
+    \+ member(ProxNodo, Caminho),
+    CustoTotal is Custo + Custo1,
+    QuantTotal is Quant + Total,
+    arco(Nodo,ProxNodo, _).
+
+% 4) Escolher o circuito mais rápido, em função da distância
+% Estratégia gulosa
+maisRapidoGuloso :-
+    inicial(I),
+    arco(I,_,Dist),
+    agulosaMaisRapido([[I]/Dist], InvCaminho/DistTotal),
+    inverso(InvCaminho,Caminho),
+    escrever(Caminho),
+    write('Distância total percorrida: '), write(DistTotal), write('\n').
+
+agulosaMaisRapido(Caminhos, Caminho) :-
+    obtem_MaisRapido(Caminhos, Caminho),
+    Caminho = [Nodo|_]/_,
+    final(Nodo).
+
+agulosaMaisRapido(Caminhos,SolucaoCaminho) :-
+    obtem_MaisRapido(Caminhos, MelhorCaminho),
+    seleciona(MelhorCaminho, Caminhos, OutrosCaminhos),
+    expande_gulosaMaisRapido(MelhorCaminho, ExpCaminhos),
+    append(OutrosCaminhos, ExpCaminhos, NovoCaminhos),
+    agulosaMaisRapido(NovoCaminhos, SolucaoCaminho).
+
+obtem_MaisRapido([Caminho],Caminho) :- !.
+
+obtem_MaisRapido([Caminho1/Dist1,_/Dist2|Caminhos], MelhorCaminho) :-
+    Dist1 =< Dist2, !,
+    obtem_MaisRapido([Caminho1/Dist1|Caminhos], MelhorCaminho).
+
+obtem_MaisRapido([_|Caminhos], MelhorCaminho) :-
+    obtem_MaisRapido(Caminhos, MelhorCaminho).
+
+expande_gulosaMaisRapido(Caminho, ExpCaminhos) :-
+    findall(NovoCaminho, adjacenteMaisRapido(Caminho, NovoCaminho), ExpCaminhos).
+
+
+adjacenteMaisRapido([Nodo|Caminho]/Dist1, [ProxNodo,Nodo|Caminho]/DistTotal) :-
+    arco(Nodo, ProxNodo, Dist),\+ member(ProxNodo, Caminho),
+    DistTotal is Dist + Dist1,
+    arco(Nodo,ProxNodo, _).
+
+% Estratégia em profundidade
+dfsMaisRapido(I,S/DistanciaTotal) :-
+    inicial(I),
+    dfsMaisRapido(I,[I],S,0,DistanciaTotal).
+
+dfsMaisRapido(Estado,_,[Inicio/Rua1/0,Estado/Rua/0],_,0) :-
+    final(Estado),
+    nodo(Estado,Rua,_,_),
+    arco(Estado,Inicio,_),
+    nodo(Inicio,Rua1,_,_).
+
+dfsMaisRapido(Estado,Historico,[Estado/Rua/Dist|Sol],DistAtual,DistTotal) :-
+    nodo(Estado,Rua,_,_),
+    arco(Estado,Estado1,Dist),
+    Dist1 is DistAtual + Dist,
+    nao(membro(Estado1,Historico)),
+    dfsMaisRapido(Estado1,[Estado1|Historico],Sol,Dist1,DistTotal1),
+    DistTotal is DistTotal1 + Dist.
+
+todosMaisRapido(Solucao,NumSolucoes) :-
+    inicial(I),
+	findall((S,DTotal),(dfsMaisRapido(I,S/DTotal)),Solucao),
+    length(Solucao,NumSolucoes).
+
+maisRapido :-
+    todosMaisRapido(Sol,_),
+    retirarElems(Sol,Sol1,500),
+    minimo(Sol1,(S,N)),
+    escreverTriplo3(S,0),
+    write('Distância ótima: '),write(N), write('\n').
+
+% 5) Circuito mais eficiente (razão distancia/quantidade recolhida menor possivel)
+dfsMaisEficiente(I,S/RazaoTotal) :-
+    inicial(I),
+    dfsMaisEficiente(I,[I],S,0,RazaoTotal).
+
+dfsMaisEficiente(Estado,_,[Estado/Rua/0,Inicio/Rua1/0],_,0) :-
+    final(Estado),
+    nodo(Estado,Rua,_,_),
+    arco(Estado,Inicio,_),
+    nodo(Inicio,Rua1,_,_).
+
+dfsMaisEficiente(Estado,Historico,[Estado/Rua/Razao|Sol],Ratual,RTotal) :-
+    nodo(Estado,Rua,_,Rs),
+    recolher(Rs,0,Total),
+    arco(Estado,Estado1,Dist),
+    Razao is Dist / Total,
+    Razao1 is Ratual + Razao,
+    nao(membro(Estado1,Historico)),
+    dfsMaisEficiente(Estado1,[Estado1|Historico],Sol,Razao1,RTotal1),
+    RTotal is Razao + RTotal1.
+
+todosMaisEficiente(Solucao,NumSolucoes) :-
+    inicial(I),
+	findall((S,Razao),(dfsMaisEficiente(I,S/Razao)),Solucao),
+    length(Solucao,NumSolucoes).
+
+maisEficiente :-
+    todosMaisEficiente(Sol,_),
+    retirarElems(Sol,Sol1,500),
+    minimo(Sol1,(S,N)),
+    escreverTriplo4(S,0),
+    write('Razão ótima: '),write(N), write('\n').
+
+
+
+
 
