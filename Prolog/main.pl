@@ -2,6 +2,14 @@
 % :- set_prolog_flag(discontiguous_warnings,off).
 % :- set_prolog_flag(single_var_warnings,off).
 
+tempo :- 
+    statistics(runtime,[Start|_]),
+    maisEficiente,
+    statistics(runtime,[Stop|_]),
+    Runtime is Stop - Start,
+    Runtime1 is Runtime / 1000,
+    write('Tempo passado: '), write(Runtime1).
+
 :- op(900,xfy,'::').
 
 % Includes necessários, dos nodos e dos arcos
@@ -11,19 +19,19 @@
 
 % ------------------------------------------ Dados do problema --------------------------------------------
 % Estado inicial (Garagem)
-inicial(15808).
+inicial(15805).
 
 % Estado final (Depósito)
 final(15899).
 
 % LIMITE PARA A PESQUISA EM PROFUNDIDADE 
-limite(6).
+limite(10).
 
 % Numero de pontos de recolha do grafo
 numNodos(6). 
 
 % Tipo de resíduo a recolher
-tipo('Lixos').
+tipo('Papel e Cartao').
 
 % ---------------------------------------------------------------------------------------------------------
 
@@ -475,7 +483,7 @@ dfsMaisRapido(I,S/DistanciaTotal) :-
     inicial(I),
     dfsMaisRapido(I,[I],S,0,DistanciaTotal).
 
-dfsMaisRapido(Estado,_,[Inicio/Rua1/0,Estado/Rua/0],_,0) :-
+dfsMaisRapido(Estado,_,[Estado/Rua/0,Inicio/Rua1/0],_,0) :-
     final(Estado),
     nodo(Estado,Rua,_,_),
     arco(Estado,Inicio,_),
